@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS military_asset_management;
+USE military_asset_management;
 
 CREATE TABLE IF NOT EXISTS roles (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -10,8 +12,8 @@ CREATE TABLE IF NOT EXISTS bases (
     code VARCHAR(20) NOT NULL UNIQUE,
     location VARCHAR(255),
     status VARCHAR(20) NOT NULL,
-    created_at DATETIME,
-    updated_at DATETIME
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS equipment_types (
@@ -21,8 +23,8 @@ CREATE TABLE IF NOT EXISTS equipment_types (
     unit_of_measure VARCHAR(30) NOT NULL,
     minimum_reserve INT NOT NULL,
     status VARCHAR(20) NOT NULL,
-    created_at DATETIME,
-    updated_at DATETIME
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -33,8 +35,8 @@ CREATE TABLE IF NOT EXISTS users (
     role_id BIGINT NOT NULL,
     base_id BIGINT NULL,
     status VARCHAR(20) NOT NULL,
-    created_at DATETIME,
-    updated_at DATETIME,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(id),
     CONSTRAINT fk_users_base FOREIGN KEY (base_id) REFERENCES bases(id)
 );
@@ -49,8 +51,8 @@ CREATE TABLE IF NOT EXISTS inventory (
     committed_quantity INT NOT NULL DEFAULT 0,
     in_transfer_quantity INT NOT NULL DEFAULT 0,
     repair_quantity INT NOT NULL DEFAULT 0,
-    created_at DATETIME,
-    updated_at DATETIME,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_inventory_base_equipment UNIQUE (base_id, equipment_type_id),
     CONSTRAINT fk_inventory_base FOREIGN KEY (base_id) REFERENCES bases(id),
     CONSTRAINT fk_inventory_equipment FOREIGN KEY (equipment_type_id) REFERENCES equipment_types(id)
@@ -66,7 +68,7 @@ CREATE TABLE IF NOT EXISTS inventory_ledger (
     quantity_out INT NOT NULL DEFAULT 0,
     balance_after INT NOT NULL,
     created_by BIGINT NOT NULL,
-    created_at DATETIME,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_ledger_base FOREIGN KEY (base_id) REFERENCES bases(id),
     CONSTRAINT fk_ledger_equipment FOREIGN KEY (equipment_type_id) REFERENCES equipment_types(id),
     CONSTRAINT fk_ledger_user FOREIGN KEY (created_by) REFERENCES users(id)
@@ -81,7 +83,7 @@ CREATE TABLE IF NOT EXISTS purchases (
     created_by BIGINT NOT NULL,
     approved_by BIGINT NULL,
     approved_at DATETIME NULL,
-    created_at DATETIME,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_purchase_base FOREIGN KEY (base_id) REFERENCES bases(id),
     CONSTRAINT fk_purchase_created_by FOREIGN KEY (created_by) REFERENCES users(id),
     CONSTRAINT fk_purchase_approved_by FOREIGN KEY (approved_by) REFERENCES users(id)
@@ -109,8 +111,8 @@ CREATE TABLE IF NOT EXISTS transfers (
     dispatched_at DATETIME NULL,
     received_by BIGINT NULL,
     received_at DATETIME NULL,
-    created_at DATETIME,
-    updated_at DATETIME,
+  	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_transfer_from_base FOREIGN KEY (from_base_id) REFERENCES bases(id),
     CONSTRAINT fk_transfer_to_base FOREIGN KEY (to_base_id) REFERENCES bases(id),
     CONSTRAINT fk_transfer_requested_by FOREIGN KEY (requested_by) REFERENCES users(id),
@@ -158,7 +160,7 @@ CREATE TABLE IF NOT EXISTS expenditures (
     created_by BIGINT NOT NULL,
     approved_by BIGINT NULL,
     approved_at DATETIME NULL,
-    created_at DATETIME,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_expenditure_base FOREIGN KEY (base_id) REFERENCES bases(id),
     CONSTRAINT fk_expenditure_equipment FOREIGN KEY (equipment_type_id) REFERENCES equipment_types(id),
     CONSTRAINT fk_expenditure_assignment FOREIGN KEY (assignment_id) REFERENCES assignments(id),
@@ -174,6 +176,6 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     entity_id BIGINT NOT NULL,
     old_value JSON NULL,
     new_value JSON NULL,
-    timestamp DATETIME,
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
