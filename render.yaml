@@ -1,0 +1,48 @@
+services:
+  - type: pserv
+    name: military-asset-mysql
+    runtime: docker
+    plan: 1c-2g
+    repo: https://github.com/render-examples/mysql.git
+    branch: master
+    envVars:
+      - key: MYSQL_DATABASE
+        value: military_asset_management
+      - key: MYSQL_USER
+        value: military_app
+      - key: MYSQL_PASSWORD
+        generateValue: true
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 10
+
+  - type: web
+    name: military-asset-management
+    runtime: docker
+    plan: free
+    envVars:
+      - key: DB_HOST
+        fromService:
+          name: military-asset-mysql
+          type: pserv
+          property: host
+      - key: DB_PORT
+        fromService:
+          name: military-asset-mysql
+          type: pserv
+          property: port
+      - key: DB_NAME
+        value: military_asset_management
+      - key: DB_USERNAME
+        fromService:
+          name: military-asset-mysql
+          type: pserv
+          envVarKey: MYSQL_USER
+      - key: DB_PASSWORD
+        fromService:
+          name: military-asset-mysql
+          type: pserv
+          envVarKey: MYSQL_PASSWORD
